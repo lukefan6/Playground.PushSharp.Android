@@ -6,19 +6,16 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
-/**
- * Created by lukefan on 2015/4/2.
- */
+
 public class GcmIntentService extends IntentService {
     public static final int NOTIFICATION_ID = 1;
-    private NotificationManager mNotificationManager;
     public static final String TAG = "GCM Demo";
+    private NotificationManager mNotificationManager;
 
     public GcmIntentService() {
         super("GcmIntentService");
@@ -39,29 +36,23 @@ public class GcmIntentService extends IntentService {
              * any message types you're not interested in, or that you don't
              * recognize.
              */
-            if (GoogleCloudMessaging.
-                    MESSAGE_TYPE_SEND_ERROR.equals(messageType)) {
-                sendNotification("Send error: " + extras.toString());
-            } else if (GoogleCloudMessaging.
-                    MESSAGE_TYPE_DELETED.equals(messageType)) {
-                sendNotification("Deleted messages on server: " +
-                        extras.toString());
-                // If it's a regular GCM message, do some work.
-            } else if (GoogleCloudMessaging.
-                    MESSAGE_TYPE_MESSAGE.equals(messageType)) {
-                // This loop represents the service doing some work.
-                for (int i=0; i<5; i++) {
-                    Log.i(TAG, "Working... " + (i + 1)
-                            + "/5 @ " + SystemClock.elapsedRealtime());
-                    try {
-                        Thread.sleep(5000);
-                    } catch (InterruptedException e) {
-                    }
-                }
-                Log.i(TAG, "Completed work @ " + SystemClock.elapsedRealtime());
-                // Post notification of received message.
-                sendNotification("Received: " + extras.toString());
-                Log.i(TAG, "Received: " + extras.toString());
+            switch (messageType) {
+                case GoogleCloudMessaging.
+                        MESSAGE_TYPE_SEND_ERROR:
+                    sendNotification("Send error: " + extras.toString());
+                    break;
+                case GoogleCloudMessaging.
+                        MESSAGE_TYPE_DELETED:
+                    sendNotification("Deleted messages on server: " +
+                            extras.toString());
+                    // If it's a regular GCM message, do some work.
+                    break;
+                case GoogleCloudMessaging.
+                        MESSAGE_TYPE_MESSAGE:
+                    // Post notification of received message.
+                    sendNotification("Received: " + extras.toString());
+                    Log.i(TAG, "Received: " + extras.toString());
+                    break;
             }
         }
         // Release the wake lock provided by the WakefulBroadcastReceiver.
@@ -77,6 +68,7 @@ public class GcmIntentService extends IntentService {
 
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(this)
+                        .setSmallIcon(R.mipmap.ic_launcher)
                         .setContentTitle("GCM Notification")
                         .setStyle(new NotificationCompat.BigTextStyle()
                                 .bigText(msg))
